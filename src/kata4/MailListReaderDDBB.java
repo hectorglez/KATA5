@@ -7,32 +7,22 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class MailListReaderDDBB {
 
-    public MailListReaderDDBB() {
+    public static ArrayList<String> read() {
+        ArrayList<String> mailList = new ArrayList<>();
         try {
             Class.forName("org.sqlite.JDBC");
             Connection c = DriverManager.getConnection("jdbc:sqlite:KATADB");
-            //Class.forName("oracle.jdbc.driver.OracleDriver");
-            //Connection c = DriverManager.getConnection("jdbc:oracle:thin:@10.22.143.90:1521:orcl","system","orcl");
-
             System.out.println("Opened database successfully");
-
             Statement stmt = c.createStatement();
-
-            String fileName = "emailsfilev1.txt";
-            BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
-            String mail;
-            while ((mail = reader.readLine()) != null) {
-                String query = "INSERT INTO MAILS (MAIL) VALUES ('" + mail + "')";
-                stmt.executeUpdate(query);
-            }
-
-            ResultSet rs = stmt.executeQuery("SELECT * FROM PEOPLE");
+            ResultSet rs = stmt.executeQuery("SELECT MAIL FROM MAILS");
             while (rs.next()) {
-                System.out.println("ID = " + rs.getInt("ID"));
-                System.out.println("NAME = " + rs.getString("NAME"));
+                String mail = rs.getString("MAIL");
+                if(!mail.contains("@"))continue;
+                mailList.add(mail);
             }
             rs.close();
             stmt.close();
@@ -41,5 +31,9 @@ public class MailListReaderDDBB {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
+        return mailList;
+    }
+
+    public MailListReaderDDBB() {
     }
 }
